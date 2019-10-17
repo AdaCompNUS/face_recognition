@@ -223,3 +223,17 @@ def compare_faces(known_face_encodings, face_encoding_to_check, tolerance=0.6):
     :return: A list of True/False values indicating which known_face_encodings match the face encoding to check
     """
     return list(face_distance(known_face_encodings, face_encoding_to_check) <= tolerance)
+
+def face_info(face_image, known_face_locations=None, num_jitters=1):
+    raw_landmarks = _raw_face_landmarks(face_image, known_face_locations, model="small")
+    landmarks_as_tuples = [[(p.x, p.y) for p in landmark.parts()] for landmark in raw_landmarks]
+    ret = []
+    for i in range(len(raw_landmarks)):
+        raw_landmark_set = raw_landmarks[i]
+        points = landmarks_as_tuples[i]
+        ret.append({"feature": np.array(face_encoder.compute_face_descriptor(face_image, raw_landmark_set, num_jitters)),
+            "nose_tip": [points[4]],
+            "left_eye": points[2:4],
+            "right_eye": points[0:2],
+        })
+    return ret
